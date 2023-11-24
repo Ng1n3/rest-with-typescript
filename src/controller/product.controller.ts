@@ -10,6 +10,7 @@ import {
   findAndUpdateProudct,
   findProduct,
 } from "../service/product.service";
+import { string } from "zod";
 
 export async function createProductHandler(
   req: Request<{}, {}, CreateProductInput["body"]>,
@@ -50,21 +51,25 @@ export async function updateProductHandler(
 ) {
   const userId = res.locals.user._id;
   const productId = req.params.productId;
+  console.log('productid',productId);
+  console.log('userId', userId);
   const update = req.body;
   const product = await findProduct({ productId });
+  console.log("product", product)
 
   if (!product) {
-    res.sendStatus(404);
+    return res.sendStatus(404);
   }
 
-  if (product.user !== userId) {
-    res.sendStatus(403);
+  
+  if (String(product.user) !== userId) {
+    return res.sendStatus(403);
   }
 
   const updatedProduct = await findAndUpdateProudct({ productId }, update, {
     new: true,
   });
-  res.send(updatedProduct);
+  return res.send(updatedProduct);
 }
 
 export async function deleteProductHandler(
@@ -79,7 +84,7 @@ export async function deleteProductHandler(
     res.sendStatus(404);
   }
 
-  if (product.user !== userId) {
+  if (String(product.user) !== userId) {
     res.sendStatus(403);
   }
 
